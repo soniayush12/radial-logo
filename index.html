@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>IIIT 3D Node Network</title>
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.9.0/lib/p5.min.js"></script>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+        background: #eeeeee;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      let nodes = [];
+      const radius = 250;
+      const totalNodes = 27;
+      const logos = [];
+
+      let rotX = 0;
+      let rotY = 0;
+      let prevMouseX, prevMouseY;
+      let dragging = false;
+
+      function preload() {
+        for (let i = 1; i <= totalNodes; i++) {
+          logos.push(loadImage('https://dummyimage.com/64x64/0077ff/ffffff&text=IIIT+' + i));
+        }
+      }
+
+      function setup() {
+        createCanvas(windowWidth, windowHeight, WEBGL);
+        angleMode(DEGREES);
+
+        const goldenAngle = 137.5;
+        for (let i = 0; i < totalNodes; i++) {
+          const theta = goldenAngle * i;
+          const y = 1 - (i / (totalNodes - 1)) * 2;
+          const r = Math.sqrt(1 - y * y);
+          const x = r * Math.cos(theta);
+          const z = r * Math.sin(theta);
+          nodes.push(createVector(x * radius, y * radius, z * radius));
+        }
+      }
+
+      function draw() {
+        background(245);
+
+        ambientLight(200);
+        directionalLight(255, 255, 255, 0, 1, -1);
+
+        rotateX(rotX);
+        rotateY(rotY);
+
+        // Center hub
+        push();
+        fill(30);
+        noStroke();
+        sphere(25);
+        pop();
+
+        // Rods and spheres
+        for (let i = 0; i < totalNodes; i++) {
+          const node = nodes[i];
+
+          // Thicker rods
+          push();
+          stroke(30);
+          strokeWeight(8); // ⬅️ Thicker rod
+          line(0, 0, 0, node.x, node.y, node.z);
+          pop();
+
+          // Logo node
+          push();
+          translate(node.x, node.y, node.z);
+          noStroke();
+          texture(logos[i]);
+          sphere(15);
+          pop();
+        }
+      }
+
+      function mousePressed() {
+        prevMouseX = mouseX;
+        prevMouseY = mouseY;
+        dragging = true;
+      }
+
+      function mouseDragged() {
+        if (dragging) {
+          const sensitivity = 0.5;
+          rotY += (mouseX - prevMouseX) * sensitivity;
+          rotX += (mouseY - prevMouseY) * sensitivity;
+          prevMouseX = mouseX;
+          prevMouseY = mouseY;
+        }
+      }
+
+      function mouseReleased() {
+        dragging = false;
+      }
+
+      function windowResized() {
+        resizeCanvas(windowWidth, windowHeight);
+      }
+    </script>
+  </body>
+</html>
